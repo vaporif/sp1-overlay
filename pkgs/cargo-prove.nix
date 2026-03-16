@@ -5,6 +5,7 @@
   sp1-src,
   sp1-sysroot,
   sp1-rev,
+  sp1-timestamp,
   cargoLockOutputHashes ? {},
 }:
 rustPlatform.buildRustPackage rec {
@@ -15,6 +16,7 @@ rustPlatform.buildRustPackage rec {
   doCheck = false;
   env = {
     VERGEN_GIT_SHA = sp1-rev;
+    VERGEN_BUILD_TIMESTAMP = sp1-timestamp;
   };
   nativeBuildInputs = [
     protobuf
