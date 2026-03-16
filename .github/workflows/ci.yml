@@ -21,10 +21,12 @@ jobs:
       - name: Check formatting
         run: nix fmt -- --check .
 
-  build:
+  check:
     strategy:
       fail-fast: false
       matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
+        sp1-version: [v5.2.4, v6.0.2]
         include:
           - runner: ubuntu-latest
             system: x86_64-linux
@@ -34,38 +36,75 @@ jobs:
             system: aarch64-darwin
 
     runs-on: ${{ matrix.runner }}
-    name: build (${{ matrix.system }})
+    name: check (${{ matrix.system }}, ${{ matrix.sp1-version }})
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: DeterminateSystems/nix-installer-action@main
-
       - uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - run: nix flake check -L
-
       - name: Build cargo-prove
-        run: nix build .#cargo-prove -L
+        run: nix build '.#legacyPackages.${{ matrix.system }}."${{ matrix.sp1-version }}".cargo-prove' -L
 
       - name: Build sp1-rust-toolchain
-        run: nix build .#sp1-rust-toolchain -L
+        run: nix build '.#legacyPackages.${{ matrix.system }}."${{ matrix.sp1-version }}".sp1-rust-toolchain' -L
 
       - name: Build sp1-host-std
-        run: nix build .#sp1-host-std -L
+        run: nix build '.#legacyPackages.${{ matrix.system }}."${{ matrix.sp1-version }}".sp1-host-std' -L
 
       - name: Build sp1-sysroot
-        run: nix build .#sp1-sysroot -L
+        run: nix build '.#legacyPackages.${{ matrix.system }}."${{ matrix.sp1-version }}".sp1-sysroot' -L
 
-      - name: Build test-app ELF via overlay
-        run: nix build ./test-app#fibonacci-elf -L
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
+        sp1-version: [v5.2.4, v6.0.2]
+        include:
+          - runner: ubuntu-latest
+            system: x86_64-linux
+          - runner: ubuntu-24.04-arm
+            system: aarch64-linux
+          - runner: macos-latest
+            system: aarch64-darwin
+          - sp1-version: v6.0.2
+            test-app: ./test-app
+            target: riscv64im-succinct-zkvm-elf
+          - sp1-version: v5.2.4
+            test-app: ./test-app-v5
+            target: riscv32im-succinct-zkvm-elf
 
-      - name: Test cargo prove build
-        run: nix develop ./test-app -c sh -c 'cd test-app/program && cargo prove build'
+    runs-on: ${{ matrix.runner }}
+    name: build (${{ matrix.system }}, ${{ matrix.sp1-version }})
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build ELF via overlay
+        run: nix build ${{ matrix.test-app }}#fibonacci-elf -L
+
+      - name: Build ELF via devshell (cargo prove)
+        run: nix develop ${{ matrix.test-app }} -c sh -c 'cd ${{ matrix.test-app }}/program && cargo prove build'
 
   verify-elf:
+    strategy:
+      fail-fast: false
+      matrix:
+        sp1-version: [v5.2.4, v6.0.2]
+        include:
+          - sp1-version: v6.0.2
+            test-app: ./test-app
+            target: riscv64im-succinct-zkvm-elf
+          - sp1-version: v5.2.4
+            test-app: ./test-app-v5
+            target: riscv32im-succinct-zkvm-elf
+
     runs-on: ubuntu-latest
-    name: verify ELF matches official toolchain
+    name: verify ELF (${{ matrix.sp1-version }})
+
     steps:
       - uses: actions/checkout@v4
 
@@ -74,20 +113,20 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build ELF via nix
-        run: nix build ./test-app#fibonacci-elf -L
+        run: nix build ${{ matrix.test-app }}#fibonacci-elf -L
 
       - name: Install SP1 toolchain
         run: |
           curl -L https://sp1.succinct.xyz | bash
-          ~/.sp1/bin/sp1up -v v6.0.2
+          ~/.sp1/bin/sp1up -v ${{ matrix.sp1-version }}
           ~/.sp1/bin/cargo-prove prove --version
 
       - name: Build ELF via official toolchain
         run: |
-          cd test-app/program
+          cd ${{ matrix.test-app }}/program
           ~/.sp1/bin/cargo-prove prove build
 
       - name: Compare ELFs
         run: |
           diff <(xxd result/fibonacci-program) \
-               <(xxd test-app/target/riscv64im-succinct-zkvm-elf/release/fibonacci-program)
+               <(xxd ${{ matrix.test-app }}/target/elf-compilation/${{ matrix.target }}/release/fibonacci-program)
