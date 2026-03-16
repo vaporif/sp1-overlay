@@ -5,7 +5,7 @@
     sp1-src = {
       owner = "succinctlabs";
       repo = "sp1";
-      rev = "7028cb0976aa8e0f5422c526a43eb25b8badd75b";
+      rev = "v6.0.2";
       sha256 = "sha256-DJ3/BlGJX9eLsBPMsmKtnoJYF9vgkxKn32dybQVggxA=";
     };
     succinct-rust = {
