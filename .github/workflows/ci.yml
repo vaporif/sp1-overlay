@@ -62,3 +62,32 @@ jobs:
 
       - name: Test cargo prove build
         run: nix develop ./test-app -c sh -c 'cd test-app/program && cargo prove build'
+
+  verify-elf:
+    runs-on: ubuntu-latest
+    name: verify ELF matches official toolchain
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build ELF via nix
+        run: nix build ./test-app#fibonacci-elf -L
+
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up -v v6.0.2
+          ~/.sp1/bin/cargo-prove prove --version
+
+      - name: Build ELF via official toolchain
+        run: |
+          cd test-app/program
+          ~/.sp1/bin/cargo-prove prove build
+
+      - name: Compare ELFs
+        run: |
+          diff <(xxd result/fibonacci-program) \
+               <(xxd test-app/target/riscv64im-succinct-zkvm-elf/release/fibonacci-program)
