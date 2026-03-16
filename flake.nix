@@ -18,6 +18,8 @@
 
     lib.mkSp1Packages = import ./lib/mkSp1Packages.nix;
 
+    legacyPackages = perSystemPkgs (pkgs: pkgs.sp1);
+
     packages = perSystemPkgs (pkgs: let
       default = pkgs.sp1.${versions.default-version};
     in {
@@ -26,10 +28,6 @@
       sp1-host-std = default.sp1-host-std;
       sp1-sysroot = default.sp1-sysroot;
       default = default.cargo-prove;
-
-      # v5
-      cargo-prove-v5 = pkgs.sp1."v5.2.4".cargo-prove;
-      sp1-rust-toolchain-v5 = pkgs.sp1."v5.2.4".sp1-rust-toolchain;
     });
 
     devShells = perSystemPkgs (pkgs: {
