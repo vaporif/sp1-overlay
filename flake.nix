@@ -40,6 +40,19 @@
       };
     });
 
+    apps = perSystemPkgs (pkgs: {
+      verify-versions = {
+        type = "app";
+        program = let
+          script = pkgs.writeShellApplication {
+            name = "verify-versions";
+            runtimeInputs = with pkgs; [curl jq nix git];
+            text = builtins.readFile ./scripts/verify-versions.sh;
+          };
+        in "${script}/bin/verify-versions";
+      };
+    });
+
     formatter = perSystemPkgs (pkgs: pkgs.alejandra);
   };
 }

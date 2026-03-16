@@ -34,6 +34,8 @@
       "-C"
       "passes=lower-atomic"
       "-C"
+      "link-arg=--image-base=0x78000000"
+      "-C"
       "panic=abort"
       "--cfg"
       "getrandom_backend=\"custom\""

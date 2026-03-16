@@ -11,6 +11,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify-versions:
+    runs-on: ubuntu-latest
+    name: verify versions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Verify versions.nix matches upstream
+        run: nix run .#verify-versions
+
   fmt:
     runs-on: ubuntu-latest
     name: fmt
