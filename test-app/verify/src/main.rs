@@ -1,8 +1,8 @@
 use alloy_sol_types::SolType;
 use fibonacci_lib::PublicValuesStruct;
 use sp1_sdk::{
-    blocking::{Prover, ProverClient},
-    SP1Stdin,
+    blocking::{ProveRequest, Prover, ProverClient},
+    ProvingKey, SP1Stdin,
 };
 
 fn main() {
