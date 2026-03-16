@@ -1,0 +1,7 @@
+[package]
+name = "verify-elf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sp1-sdk = "5.0"

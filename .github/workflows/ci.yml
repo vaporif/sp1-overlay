@@ -97,10 +97,8 @@ jobs:
         include:
           - sp1-version: v6.0.2
             test-app: ./test-app
-            target: riscv64im-succinct-zkvm-elf
           - sp1-version: v5.2.4
             test-app: ./test-app-v5
-            target: riscv32im-succinct-zkvm-elf
 
     runs-on: ubuntu-latest
     name: verify ELF (${{ matrix.sp1-version }})
@@ -112,21 +110,19 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@main
 
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
       - name: Build ELF via nix
         run: nix build ${{ matrix.test-app }}#fibonacci-elf -L
 
-      - name: Install SP1 toolchain
+      - name: Execute nix-built ELF
         run: |
-          curl -L https://sp1.succinct.xyz | bash
-          ~/.sp1/bin/sp1up -v ${{ matrix.sp1-version }}
-          ~/.sp1/bin/cargo-prove prove --version
-
-      - name: Build ELF via official toolchain
-        run: |
-          cd ${{ matrix.test-app }}/program
-          ~/.sp1/bin/cargo-prove prove build
-
-      - name: Compare ELFs
-        run: |
-          diff <(xxd result/fibonacci-program) \
-               <(xxd ${{ matrix.test-app }}/target/elf-compilation/${{ matrix.target }}/release/fibonacci-program)
+          cd ${{ matrix.test-app }}/verify
+          cargo run --release -- $GITHUB_WORKSPACE/result/fibonacci-program
