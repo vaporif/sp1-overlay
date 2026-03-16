@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    name: fmt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Check formatting
+        run: nix fmt -- --check .
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            system: x86_64-linux
+          - runner: ubuntu-24.04-arm
+            system: aarch64-linux
+          - runner: macos-latest
+            system: aarch64-darwin
+
+    runs-on: ${{ matrix.runner }}
+    name: build (${{ matrix.system }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - run: nix flake check -L
+
+      - name: Build cargo-prove
+        run: nix build .#cargo-prove -L
+
+      - name: Build sp1-rust-toolchain
+        run: nix build .#sp1-rust-toolchain -L
+
+      - name: Build sp1-host-std
+        run: nix build .#sp1-host-std -L
+
+      - name: Build sp1-sysroot
+        run: nix build .#sp1-sysroot -L
+
+      - name: Build test-app ELF via overlay
+        run: nix build ./test-app#fibonacci-elf -L
+
+      - name: Test cargo prove build
+        run: nix develop ./test-app -c sh -c 'cd test-app/program && cargo prove build'
