@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 sp1-sdk = "5.0"
+alloy-sol-types = "*"
+fibonacci-lib = { path = "../lib" }

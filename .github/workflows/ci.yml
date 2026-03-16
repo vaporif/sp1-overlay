@@ -125,4 +125,4 @@ jobs:
       - name: Execute nix-built ELF
         run: |
           cd ${{ matrix.test-app }}/verify
-          cargo run --release -- $GITHUB_WORKSPACE/result/fibonacci-program
+          cargo run --release -- $GITHUB_WORKSPACE/result/fibonacci-program --prove
