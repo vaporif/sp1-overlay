@@ -6,11 +6,17 @@ fn main() {
         .expect("usage: verify-elf <elf-path>");
     let elf = std::fs::read(&path).expect("failed to read ELF");
 
-    let client = ProverClient::new();
+    let client = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
     stdin.write(&20u32);
 
-    let (output, report) = client.execute(&elf, stdin).run().expect("execution failed");
-    assert!(!output.is_empty(), "execution produced no output");
+    let (output, report) = client
+        .execute(&elf, &stdin)
+        .run()
+        .expect("execution failed");
+    assert!(
+        !output.as_slice().is_empty(),
+        "execution produced no output"
+    );
     println!("ELF verified: {} cycles", report.total_instruction_count());
 }
