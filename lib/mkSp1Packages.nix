@@ -5,13 +5,7 @@
   sp1-src = pkgs.fetchFromGitHub {
     inherit (versionConfig.sp1-src) owner repo rev sha256;
   };
-  sp1-meta = builtins.fetchTree {
-    type = "github";
-    inherit (versionConfig.sp1-src) owner repo rev;
-  };
-  sp1-date = let
-    d = sp1-meta.lastModifiedDate;
-  in "${builtins.substring 0 4 d}-${builtins.substring 4 2 d}-${builtins.substring 6 2 d}T${builtins.substring 8 2 d}:${builtins.substring 10 2 d}:${builtins.substring 12 2 d}Z";
+
   succinct-rust = pkgs.fetchFromGitHub {
     inherit (versionConfig.succinct-rust) owner repo rev sha256;
   };
@@ -53,7 +47,6 @@
   cargo-prove = pkgs.callPackage ../pkgs/cargo-prove.nix {
     inherit sp1-sysroot sp1-src;
     sp1-rev = versionConfig.sp1-src.rev;
-    sp1-timestamp = sp1-date;
     cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
   };
 
