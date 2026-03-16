@@ -120,48 +120,9 @@ See [`test-app/`](test-app/) for a complete working example.
 
 ## Custom SP1 versions
 
-Use `lib.mkSp1Packages` to build any SP1 version not included in the overlay:
+Use `lib.mkSp1Packages` to build any SP1 version not included in the overlay. Copy an existing entry from [`lib/versions.nix`](lib/versions.nix) as a template.
 
-```nix
-{
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    sp1.url = "github:vaporif/sp1-overlay";
-  };
-
-  outputs = { nixpkgs, sp1, ... }:
-    let
-      system = "aarch64-darwin";
-      pkgs = import nixpkgs { inherit system; };
-      my-sp1 = sp1.lib.mkSp1Packages {
-        inherit pkgs;
-        versionConfig = {
-          sp1-src = { owner = "succinctlabs"; repo = "sp1"; rev = "<commit>"; sha256 = "<hash>"; };
-          succinct-rust = { owner = "succinctlabs"; repo = "rust"; rev = "<branch>"; sha256 = "<hash>"; };
-          backtrace-rs = { owner = "rust-lang"; repo = "backtrace-rs"; rev = "<commit>"; sha256 = "<hash>"; };
-          toolchain-version = "1.93.0-64bit";
-          target = "riscv64im-succinct-zkvm-elf";
-          edition = "2024";
-          toolchain-hashes = {
-            x86_64-linux = "<hash>";
-            aarch64-linux = "<hash>";
-            x86_64-darwin = "<hash>";
-            aarch64-darwin = "<hash>";
-          };
-          cargo-lock-output-hashes = {};
-          build-flags = [ "-C" "passes=lower-atomic" "-C" "panic=abort" ];
-          extra-build-env = {};
-        };
-      };
-    in {
-      devShells.${system}.default = pkgs.mkShell {
-        packages = [ my-sp1.cargo-prove ];
-      };
-    };
-}
-```
-
-Use an existing version from [`lib/versions.nix`](lib/versions.nix) as a template. Set `backtrace-rs = null` if the Rust fork includes its own checkout.
+See [`docs/upstream-reference.md`](docs/upstream-reference.md) for where each field comes from in SP1's source code and how to find the correct values for a new version.
 
 ## How it works
 
