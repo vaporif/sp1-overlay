@@ -13,7 +13,7 @@ fn main() {
 
     let client = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
-    stdin.write(&2u32);
+    stdin.write(&5u32);
 
     // Execute and verify output values
     let (output, report) = client
@@ -23,12 +23,12 @@ fn main() {
 
     let decoded =
         PublicValuesStruct::abi_decode(output.as_slice()).expect("failed to decode output");
-    let (expected_a, expected_b) = fibonacci_lib::fibonacci(2);
-    assert_eq!(decoded.n, 2);
+    let (expected_a, expected_b) = fibonacci_lib::fibonacci(5);
+    assert_eq!(decoded.n, 5);
     assert_eq!(decoded.a, expected_a);
     assert_eq!(decoded.b, expected_b);
     println!(
-        "Output verified: fib(20) = ({}, {}), cycles: {}",
+        "Output verified: fib(5) = ({}, {}), cycles: {}",
         expected_a,
         expected_b,
         report.total_instruction_count()
@@ -36,7 +36,7 @@ fn main() {
 
     if prove {
         let mut stdin = SP1Stdin::new();
-        stdin.write(&2u32);
+        stdin.write(&5u32);
 
         let (pk, vk) = client.setup(&elf);
         let proof = client
