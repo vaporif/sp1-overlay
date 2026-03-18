@@ -31,7 +31,7 @@ fn main() {
     assert_eq!(decoded.a, expected_a);
     assert_eq!(decoded.b, expected_b);
     println!(
-        "Output verified: fib(20) = ({}, {}), cycles: {}",
+        "Output verified: fib(2) = ({}, {}), cycles: {}",
         expected_a,
         expected_b,
         report.total_instruction_count()

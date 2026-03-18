@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: true
 
-    name: Build and Execute
+    name: Build, Execute, and Prove
     runs-on:
       - runs-on
       - runner=16cpu-linux-x64
@@ -49,3 +49,7 @@ jobs:
       - name: Execute SP1 program
         run: |
           cargo run --release -- --execute
+
+      - name: Prove SP1 program
+        run: |
+          cargo run --release -- --prove

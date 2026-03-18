@@ -132,7 +132,13 @@ jobs:
       - name: Build ELF via nix
         run: nix build ${{ matrix.test-app }}#fibonacci-elf -L
 
-      - name: Execute nix-built ELF
+      - name: Build verify binary
         run: |
           cd ${{ matrix.test-app }}/verify
-          cargo run --release -- $GITHUB_WORKSPACE/result/fibonacci-program --prove
+          cargo build --release
+
+      - name: Execute nix-built ELF
+        run: ${{ matrix.test-app }}/verify/target/release/verify-elf $GITHUB_WORKSPACE/result/fibonacci-program
+
+      - name: Prove nix-built ELF
+        run: ${{ matrix.test-app }}/verify/target/release/verify-elf $GITHUB_WORKSPACE/result/fibonacci-program --prove
