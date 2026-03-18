@@ -25,3 +25,5 @@ result
 
 # Direnv
 .envrc
+
+.DS_Store
