@@ -26,4 +26,3 @@ jobs:
           visibility: "public"
           name: "vaporif/sp1-overlay"
           tag: "${{ inputs.tag }}"
-          include-output-paths: true
