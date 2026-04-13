@@ -25,7 +25,7 @@ SP1's CLI defines which Rust toolchain to use:
 pub const LATEST_SUPPORTED_TOOLCHAIN_VERSION_TAG: &str = "succinct-1.93.0-64bit";
 ```
 
-Strip the `succinct-` prefix to get the value for `versions.nix`. For v6.0.2 this is `"1.93.0-64bit"`, for v5.2.4 it's `"1.91.1"`.
+Strip the `succinct-` prefix to get the value for `versions.nix`. For v6.1.0 this is `"1.93.0-64bit"`, for v5.2.4 it's `"1.91.1"`.
 
 ### target
 
@@ -113,7 +113,7 @@ nix hash to-sri --type sha256 $(nix-prefetch-url --unpack \
 These are Nix content hashes of the fetched source. They are **self-verifying** — if wrong, the build fails. To compute them for a new version:
 
 ```bash
-nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags/v6.0.2.tar.gz"
+nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags/v6.1.0.tar.gz"
 ```
 
 Or set `sha256 = "";` and let Nix report the correct hash on first build attempt.

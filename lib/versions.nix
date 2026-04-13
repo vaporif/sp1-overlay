@@ -1,12 +1,12 @@
 {
-  default-version = "v6.0.2";
+  default-version = "v6.1.0";
 
-  "v6.0.2" = {
+  "v6.1.0" = {
     sp1-src = {
       owner = "succinctlabs";
       repo = "sp1";
-      rev = "v6.0.2";
-      sha256 = "sha256-DJ3/BlGJX9eLsBPMsmKtnoJYF9vgkxKn32dybQVggxA=";
+      rev = "v6.1.0";
+      sha256 = "sha256-V59lA3VrPxVfeqbnjnofUPGsKViiVFsTByx1ng7CZpg=";
     };
     succinct-rust = {
       owner = "succinctlabs";

@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         runner: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
-        sp1-version: [v5.2.4, v6.0.2]
+        sp1-version: [v5.2.4, v6.1.0]
         include:
           - runner: ubuntu-latest
             system: x86_64-linux
@@ -70,7 +70,7 @@ jobs:
       fail-fast: false
       matrix:
         runner: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
-        sp1-version: [v5.2.4, v6.0.2]
+        sp1-version: [v5.2.4, v6.1.0]
         include:
           - runner: ubuntu-latest
             system: x86_64-linux
@@ -78,7 +78,7 @@ jobs:
             system: aarch64-linux
           - runner: macos-latest
             system: aarch64-darwin
-          - sp1-version: v6.0.2
+          - sp1-version: v6.1.0
             test-app: ./test-app
             target: riscv64im-succinct-zkvm-elf
           - sp1-version: v5.2.4
@@ -103,9 +103,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sp1-version: [v5.2.4, v6.0.2]
+        sp1-version: [v5.2.4, v6.1.0]
         include:
-          - sp1-version: v6.0.2
+          - sp1-version: v6.1.0
             test-app: ./test-app
           - sp1-version: v5.2.4
             test-app: ./test-app-v5
