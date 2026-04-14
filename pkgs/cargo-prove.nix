@@ -37,7 +37,6 @@ rustPlatform.buildRustPackage rec {
   };
   postFixup = ''
     wrapProgram $out/bin/cargo-prove \
-      --prefix PATH : ${sp1-sysroot}/bin \
-      --set CARGO_PROFILE_RELEASE_TRIM_PATHS false
+      --prefix PATH : ${sp1-sysroot}/bin
   '';
 }
