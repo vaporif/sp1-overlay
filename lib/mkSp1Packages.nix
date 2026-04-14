@@ -45,7 +45,7 @@
   };
 
   sp1-core-runner-binary =
-    if versionConfig.prebuilt-runner or false
+    if !(versionConfig.skip-prebuilt-runner or false)
     then
       pkgs.callPackage ../pkgs/sp1-core-runner-binary.nix {
         inherit sp1-src;

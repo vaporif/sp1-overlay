@@ -12,6 +12,7 @@ This document maps each field in [`lib/versions.nix`](../lib/versions.nix) to it
 | `succinct-rust.rev` | Resolve the toolchain tag on `succinctlabs/rust` to a commit SHA |
 | `backtrace-rs.rev` | Git submodule at `library/backtrace` in `succinctlabs/rust` |
 | `toolchain-hashes` | SHA256 of release artifacts at `succinctlabs/rust/releases` |
+| `skip-prebuilt-runner` | Set `true` for versions without `crates/core/runner/binary/` (pre-v6.1.0) |
 | `sp1-src.sha256` | Nix-computed hash of the source tarball (self-verifying) |
 
 ## Detailed walkthrough
@@ -129,6 +130,12 @@ Version-specific environment variables needed during compilation:
 
 The Rust edition used for building the host standard library. Check the `edition` field in `library/std/Cargo.toml` of the Succinct Rust fork at the relevant commit.
 
+### skip-prebuilt-runner
+
+Starting with v6.1.0, SP1's `crates/core/runner` has a `build.rs` that shells out to `cargo build` for an internal helper binary. The nested build breaks in the Nix sandbox because the output path doesn't match what the script expects. By default, the overlay builds the runner binary in its own derivation and feeds it back through `SP1_CORE_RUNNER_OVERRIDE_BINARY` (an escape hatch the upstream build.rs already supports).
+
+Set `skip-prebuilt-runner = true` for older versions that don't have `crates/core/runner/binary/Cargo.toml`. When omitted, the prebuilt runner is enabled.
+
 ## Adding a new SP1 version
 
 1. Find the SP1 release tag (e.g., `v7.0.0`)
@@ -138,5 +145,6 @@ The Rust edition used for building the host standard library. Check the `edition
 5. Extract build flags from `crates/build/src/command/utils.rs`
 6. Extract the target from `crates/build/src/lib.rs`
 7. Compute toolchain hashes for all 4 platforms
-8. Add the entry to `lib/versions.nix` using an existing version as template
-9. Run CI to verify everything builds and proofs verify
+8. Check if `crates/core/runner/binary/Cargo.toml` exists — if not, set `skip-prebuilt-runner = true`
+9. Add the entry to `lib/versions.nix` using an existing version as template
+10. Run CI to verify everything builds and proofs verify
