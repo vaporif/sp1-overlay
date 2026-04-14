@@ -12,6 +12,8 @@ This document maps each field in [`lib/versions.nix`](../lib/versions.nix) to it
 | `succinct-rust.rev` | Resolve the toolchain tag on `succinctlabs/rust` to a commit SHA |
 | `backtrace-rs.rev` | Git submodule at `library/backtrace` in `succinctlabs/rust` |
 | `toolchain-hashes` | SHA256 of release artifacts at `succinctlabs/rust/releases` |
+| `skip-prebuilt-runner` | Set `true` for versions without `crates/core/runner/binary/` (pre-v6.1.0) |
+| `cargo-prove-wrapper-env` | Runtime env vars for `cargo-prove` (e.g. disable trim-paths for older toolchains) |
 | `sp1-src.sha256` | Nix-computed hash of the source tarball (self-verifying) |
 
 ## Detailed walkthrough
@@ -25,7 +27,7 @@ SP1's CLI defines which Rust toolchain to use:
 pub const LATEST_SUPPORTED_TOOLCHAIN_VERSION_TAG: &str = "succinct-1.93.0-64bit";
 ```
 
-Strip the `succinct-` prefix to get the value for `versions.nix`. For v6.0.2 this is `"1.93.0-64bit"`, for v5.2.4 it's `"1.91.1"`.
+Strip the `succinct-` prefix to get the value for `versions.nix`. For v6.1.0 this is `"1.93.0-64bit"`, for v5.2.4 it's `"1.91.1"`.
 
 ### target
 
@@ -113,7 +115,7 @@ nix hash to-sri --type sha256 $(nix-prefetch-url --unpack \
 These are Nix content hashes of the fetched source. They are **self-verifying** — if wrong, the build fails. To compute them for a new version:
 
 ```bash
-nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags/v6.0.2.tar.gz"
+nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags/v6.1.0.tar.gz"
 ```
 
 Or set `sha256 = "";` and let Nix report the correct hash on first build attempt.
@@ -129,6 +131,20 @@ Version-specific environment variables needed during compilation:
 
 The Rust edition used for building the host standard library. Check the `edition` field in `library/std/Cargo.toml` of the Succinct Rust fork at the relevant commit.
 
+### skip-prebuilt-runner
+
+SP1 v6.1.0 added a `build.rs` in `crates/core/runner` that shells out to `cargo build` for an internal helper binary. That nested build doesn't work in the Nix sandbox — the output lands in a different path than the script expects. To work around this, the overlay builds the runner binary in its own derivation and passes it back via `SP1_CORE_RUNNER_OVERRIDE_BINARY`, an escape hatch the upstream build.rs already supports.
+
+This is on by default. Set `skip-prebuilt-runner = true` for older versions that don't have `crates/core/runner/binary/Cargo.toml`.
+
+### cargo-prove-wrapper-env
+
+Extra environment variables baked into the `cargo-prove` wrapper (via `wrapProgram --set`). These take effect at runtime when a user runs `cargo prove build`.
+
+v5.2.4 needs `CARGO_PROFILE_RELEASE_TRIM_PATHS = "false"` here. Cargo 1.94+ turns on trim-paths by default in release builds, which passes `--remap-path-scope` to rustc — a flag the v5.2.4 Succinct rustc (based on 1.91) doesn't understand. Newer SP1 versions ship a Succinct rustc that handles it fine, so they can leave this empty.
+
+Defaults to `{}` when omitted.
+
 ## Adding a new SP1 version
 
 1. Find the SP1 release tag (e.g., `v7.0.0`)
@@ -138,5 +154,6 @@ The Rust edition used for building the host standard library. Check the `edition
 5. Extract build flags from `crates/build/src/command/utils.rs`
 6. Extract the target from `crates/build/src/lib.rs`
 7. Compute toolchain hashes for all 4 platforms
-8. Add the entry to `lib/versions.nix` using an existing version as template
-9. Run CI to verify everything builds and proofs verify
+8. Check if `crates/core/runner/binary/Cargo.toml` exists — if not, set `skip-prebuilt-runner = true`
+9. Add the entry to `lib/versions.nix` using an existing version as template
+10. Run CI to verify everything builds and proofs verify

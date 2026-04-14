@@ -22,17 +22,17 @@ Multiple SP1 versions are available through the overlay under `pkgs.sp1.<version
 
 | Version | SP1 | Toolchain | Target |
 |---------|-----|-----------|--------|
-| `v6.0.2` (default) | 6.0.2 | 1.93.0-64bit | `riscv64im-succinct-zkvm-elf` |
+| `v6.1.0` (default) | 6.1.0 | 1.93.0-64bit | `riscv64im-succinct-zkvm-elf` |
 | `v5.2.4` | 5.2.4 | 1.91.1 | `riscv32im-succinct-zkvm-elf` |
 
 ```nix
 # Via overlay
-pkgs.sp1."v6.0.2".cargo-prove
+pkgs.sp1."v6.1.0".cargo-prove
 pkgs.sp1."v5.2.4".cargo-prove
 
 # Top-level aliases point to the default version
-pkgs.cargo-prove        # = pkgs.sp1."v6.0.2".cargo-prove
-pkgs.buildSp1Program    # = pkgs.sp1."v6.0.2".buildSp1Program
+pkgs.cargo-prove        # = pkgs.sp1."v6.1.0".cargo-prove
+pkgs.buildSp1Program    # = pkgs.sp1."v6.1.0".buildSp1Program
 ```
 
 ## Installation

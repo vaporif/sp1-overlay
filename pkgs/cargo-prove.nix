@@ -1,12 +1,15 @@
 {
   rustPlatform,
+  lib,
   protobuf,
   makeWrapper,
   sp1-src,
   sp1-sysroot,
+  sp1-core-runner-binary ? null,
   sp1-rev,
   sp1-timestamp,
   cargoLockOutputHashes ? {},
+  wrapperEnv ? {},
 }:
 rustPlatform.buildRustPackage rec {
   pname = "cargo-prove";
@@ -14,10 +17,18 @@ rustPlatform.buildRustPackage rec {
   src = sp1-src;
   buildAndTestSubdir = "crates/cli";
   doCheck = false;
-  env = {
-    VERGEN_GIT_SHA = sp1-rev;
-    VERGEN_BUILD_TIMESTAMP = sp1-timestamp;
-  };
+  env =
+    {
+      VERGEN_GIT_SHA = sp1-rev;
+      VERGEN_BUILD_TIMESTAMP = sp1-timestamp;
+    }
+    // (
+      if sp1-core-runner-binary != null
+      then {
+        SP1_CORE_RUNNER_OVERRIDE_BINARY = "${sp1-core-runner-binary}/bin/sp1-core-executor-runner-binary";
+      }
+      else {}
+    );
   nativeBuildInputs = [
     protobuf
     makeWrapper
@@ -26,8 +37,12 @@ rustPlatform.buildRustPackage rec {
     lockFile = "${src}/Cargo.lock";
     outputHashes = cargoLockOutputHashes;
   };
-  postFixup = ''
+  postFixup = let
+    wrapperArgs =
+      ["--prefix PATH : ${sp1-sysroot}/bin"]
+      ++ lib.mapAttrsToList (k: v: "--set ${k} ${v}") wrapperEnv;
+  in ''
     wrapProgram $out/bin/cargo-prove \
-      --prefix PATH : ${sp1-sysroot}/bin
+      ${lib.concatStringsSep " \\\n      " wrapperArgs}
   '';
 }
