@@ -96,6 +96,5 @@
     extra-build-env = {
       "CFLAGS_riscv32im_succinct_zkvm_elf" = "-D__ILP32__";
     };
-    prebuilt-runner = false;
   };
 }
