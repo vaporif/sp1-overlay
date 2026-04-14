@@ -45,6 +45,7 @@
       "llvm-args=-misched-postra-direction=bottomup"
     ];
     extra-build-env = {};
+    prebuilt-runner = true;
   };
 
   "v5.2.4" = {
@@ -95,5 +96,6 @@
     extra-build-env = {
       "CFLAGS_riscv32im_succinct_zkvm_elf" = "-D__ILP32__";
     };
+    prebuilt-runner = false;
   };
 }

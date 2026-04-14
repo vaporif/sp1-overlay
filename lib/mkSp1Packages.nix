@@ -44,8 +44,17 @@
     target = versionConfig.target;
   };
 
+  sp1-core-runner-binary =
+    if versionConfig.prebuilt-runner or false
+    then
+      pkgs.callPackage ../pkgs/sp1-core-runner-binary.nix {
+        inherit sp1-src;
+        cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
+      }
+    else null;
+
   cargo-prove = pkgs.callPackage ../pkgs/cargo-prove.nix {
-    inherit sp1-sysroot sp1-src;
+    inherit sp1-sysroot sp1-src sp1-core-runner-binary;
     sp1-rev = versionConfig.sp1-src.rev;
     sp1-timestamp = "";
     cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
