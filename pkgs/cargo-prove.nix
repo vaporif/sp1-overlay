@@ -1,5 +1,6 @@
 {
   rustPlatform,
+  lib,
   protobuf,
   makeWrapper,
   sp1-src,
@@ -8,6 +9,7 @@
   sp1-rev,
   sp1-timestamp,
   cargoLockOutputHashes ? {},
+  wrapperEnv ? {},
 }:
 rustPlatform.buildRustPackage rec {
   pname = "cargo-prove";
@@ -35,8 +37,12 @@ rustPlatform.buildRustPackage rec {
     lockFile = "${src}/Cargo.lock";
     outputHashes = cargoLockOutputHashes;
   };
-  postFixup = ''
+  postFixup = let
+    wrapperArgs =
+      ["--prefix PATH : ${sp1-sysroot}/bin"]
+      ++ lib.mapAttrsToList (k: v: "--set ${k} ${v}") wrapperEnv;
+  in ''
     wrapProgram $out/bin/cargo-prove \
-      --prefix PATH : ${sp1-sysroot}/bin
+      ${lib.concatStringsSep " \\\n      " wrapperArgs}
   '';
 }

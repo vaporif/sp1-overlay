@@ -96,5 +96,11 @@
       "CFLAGS_riscv32im_succinct_zkvm_elf" = "-D__ILP32__";
     };
     skip-prebuilt-runner = true;
+    # Cargo 1.94+ enables trim-paths by default in release, passing --remap-path-scope
+    # to rustc. The v5.2.4 Succinct rustc (based on 1.91) doesn't support that flag.
+    # v6.1.0+ uses a newer Succinct rustc where this isn't an issue.
+    cargo-prove-wrapper-env = {
+      CARGO_PROFILE_RELEASE_TRIM_PATHS = "false";
+    };
   };
 }

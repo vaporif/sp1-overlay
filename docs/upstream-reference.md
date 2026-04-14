@@ -13,6 +13,7 @@ This document maps each field in [`lib/versions.nix`](../lib/versions.nix) to it
 | `backtrace-rs.rev` | Git submodule at `library/backtrace` in `succinctlabs/rust` |
 | `toolchain-hashes` | SHA256 of release artifacts at `succinctlabs/rust/releases` |
 | `skip-prebuilt-runner` | Set `true` for versions without `crates/core/runner/binary/` (pre-v6.1.0) |
+| `cargo-prove-wrapper-env` | Runtime env vars for `cargo-prove` (e.g. disable trim-paths for older toolchains) |
 | `sp1-src.sha256` | Nix-computed hash of the source tarball (self-verifying) |
 
 ## Detailed walkthrough
@@ -132,9 +133,17 @@ The Rust edition used for building the host standard library. Check the `edition
 
 ### skip-prebuilt-runner
 
-Starting with v6.1.0, SP1's `crates/core/runner` has a `build.rs` that shells out to `cargo build` for an internal helper binary. The nested build breaks in the Nix sandbox because the output path doesn't match what the script expects. By default, the overlay builds the runner binary in its own derivation and feeds it back through `SP1_CORE_RUNNER_OVERRIDE_BINARY` (an escape hatch the upstream build.rs already supports).
+SP1 v6.1.0 added a `build.rs` in `crates/core/runner` that shells out to `cargo build` for an internal helper binary. That nested build doesn't work in the Nix sandbox — the output lands in a different path than the script expects. To work around this, the overlay builds the runner binary in its own derivation and passes it back via `SP1_CORE_RUNNER_OVERRIDE_BINARY`, an escape hatch the upstream build.rs already supports.
 
-Set `skip-prebuilt-runner = true` for older versions that don't have `crates/core/runner/binary/Cargo.toml`. When omitted, the prebuilt runner is enabled.
+This is on by default. Set `skip-prebuilt-runner = true` for older versions that don't have `crates/core/runner/binary/Cargo.toml`.
+
+### cargo-prove-wrapper-env
+
+Extra environment variables baked into the `cargo-prove` wrapper (via `wrapProgram --set`). These take effect at runtime when a user runs `cargo prove build`.
+
+v5.2.4 needs `CARGO_PROFILE_RELEASE_TRIM_PATHS = "false"` here. Cargo 1.94+ turns on trim-paths by default in release builds, which passes `--remap-path-scope` to rustc — a flag the v5.2.4 Succinct rustc (based on 1.91) doesn't understand. Newer SP1 versions ship a Succinct rustc that handles it fine, so they can leave this empty.
+
+Defaults to `{}` when omitted.
 
 ## Adding a new SP1 version
 
