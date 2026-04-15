@@ -17,6 +17,10 @@ if [[ -z "$REPO_ROOT" || ! -f "$REPO_ROOT/lib/versions.nix" ]]; then
   REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 fi
 GITHUB_API="https://api.github.com"
+CURL_AUTH=()
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+  CURL_AUTH=(-H "Authorization: token ${GITHUB_TOKEN}")
+fi
 ERRORS=0
 
 red()   { printf '\033[1;31m%s\033[0m\n' "$*"; }
@@ -36,26 +40,26 @@ fi
 # Fetch a file from GitHub (raw content)
 gh_raw() {
   local owner="$1" repo="$2" ref="$3" path="$4"
-  curl -sfL "https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}"
+  curl -sfL "${CURL_AUTH[@]}" "https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}"
 }
 
 # Fetch a submodule SHA from GitHub API
 gh_submodule_sha() {
   local owner="$1" repo="$2" ref="$3" path="$4"
-  curl -sfL "${GITHUB_API}/repos/${owner}/${repo}/contents/${path}?ref=${ref}" | jq -r '.sha'
+  curl -sfL "${CURL_AUTH[@]}" "${GITHUB_API}/repos/${owner}/${repo}/contents/${path}?ref=${ref}" | jq -r '.sha'
 }
 
 # Resolve a tag to a commit SHA
 gh_tag_commit() {
   local owner="$1" repo="$2" tag="$3"
   local response
-  response="$(curl -sfL "${GITHUB_API}/repos/${owner}/${repo}/git/ref/tags/${tag}")"
+  response="$(curl -sfL "${CURL_AUTH[@]}" "${GITHUB_API}/repos/${owner}/${repo}/git/ref/tags/${tag}")"
   local obj_type obj_sha
   obj_type="$(echo "$response" | jq -r '.object.type')"
   obj_sha="$(echo "$response" | jq -r '.object.sha')"
   if [[ "$obj_type" == "tag" ]]; then
     # Annotated tag — dereference
-    curl -sfL "${GITHUB_API}/repos/${owner}/${repo}/git/tags/${obj_sha}" | jq -r '.object.sha'
+    curl -sfL "${CURL_AUTH[@]}" "${GITHUB_API}/repos/${owner}/${repo}/git/tags/${obj_sha}" | jq -r '.object.sha'
   else
     echo "$obj_sha"
   fi
