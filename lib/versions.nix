@@ -29,18 +29,8 @@
       x86_64-darwin = "sha256-ujWSL2FCBgNbtIfxF59yDuoR67A1wc96mRPtMLGPdNw=";
       aarch64-darwin = "sha256-qOnpaVr4fY0Sd+f+u4yiOABNY0/0iRWLMv4E5x/qY7M=";
     };
-    cargo-lock-output-hashes = {
-      "bls12_381-0.8.0" = "sha256-xYYdqzYaQcS7fCo08uXsp58sU4pHFAlARx23fw1tVDE=";
-      "ecdsa-0.16.9" = "sha256-U5dw8S9CY9t92K0t9awyvAXQrFi/yDdo62MsH+eazaM=";
-      "k256-0.13.4" = "sha256-QqivVv8LtJGh+zL+CBcR4Aq94tSTRTB7KJHuu3txjwA=";
-      "kzg-rs-0.2.8" = "sha256-c7who/VWYHFKt+WWP569iApJUfi/j5x7vnr2taBgbjc=";
-      "p256-0.13.2" = "sha256-7dSYJgAfu6hcv0Jt/m2HWA6d8a+TED5R0gA4l/lz5Ak=";
-      "primeorder-0.13.1" = "sha256-7dSYJgAfu6hcv0Jt/m2HWA6d8a+TED5R0gA4l/lz5Ak=";
-      "rfc6979-0.4.0" = "sha256-U5dw8S9CY9t92K0t9awyvAXQrFi/yDdo62MsH+eazaM=";
-      "sha2-0.10.9" = "sha256-sNpsZzCh0IY1qKsPzUpzLsn5X/yhLzF+U0tUJZ8TAKQ=";
-      "substrate-bn-0.6.0" = "sha256-gif0KiK3WrljEHcAo5cP29aEcsIs43WtZRW/shAB9B0=";
-      "tiny-keccak-2.0.2" = "sha256-+qjJXG94fYdPGJpeCy2hVBqch2R7vuMvBQYbAaNP6YA=";
-    };
+    cargo-lock-output-hashes = {};
+    cargo-hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     build-flags = [
       "-C"
       "passes=lower-atomic"

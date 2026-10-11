@@ -51,6 +51,7 @@
         inherit sp1-src;
         subdir = versionConfig.runner-binary-subdir or "crates/core/runner/binary";
         cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
+        cargoHash = versionConfig.cargo-hash or null;
       }
     else null;
 
@@ -59,6 +60,7 @@
     sp1-rev = versionConfig.sp1-src.rev;
     sp1-timestamp = "";
     cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
+    cargoHash = versionConfig.cargo-hash or null;
     wrapperEnv = versionConfig.cargo-prove-wrapper-env or {};
   };
 

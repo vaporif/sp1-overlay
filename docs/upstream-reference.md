@@ -14,6 +14,7 @@ This document maps each field in [`lib/versions.nix`](../lib/versions.nix) to it
 | `toolchain-hashes` | SHA256 of release artifacts at `succinctlabs/rust/releases` |
 | `skip-prebuilt-runner` | Set `true` for versions without `crates/core/runner/binary/` (pre-v6.1.0) |
 | `runner-binary-subdir` | Path of the `sp1-core-executor-runner-binary` crate: `crates/core/runner/binary` (default, v6.1.0) or `crates/core/runner-binary` (later v6) |
+| `cargo-hash` | Vendor hash for `cargo-prove` and the runner binary; needed when SP1's `Cargo.lock` has the same crate from both crates.io and git (v6.9.0 needs it) |
 | `cargo-prove-wrapper-env` | Runtime env vars for `cargo-prove` (e.g. disable trim-paths for older toolchains) |
 | `sp1-src.sha256` | Nix-computed hash of the source tarball (self-verifying) |
 
@@ -141,6 +142,12 @@ This is on by default. Set `skip-prebuilt-runner = true` for older versions that
 ### runner-binary-subdir
 
 Where the runner binary crate lives. v6.1.0 had it at `crates/core/runner/binary` (the default); later v6 releases moved it to `crates/core/runner-binary`.
+
+### cargo-hash
+
+SP1 v6.9.0's `Cargo.lock` pulls some crates (`sha2`, `k256`, `p256`, `ecdsa`, ...) from both crates.io and the `sp1-patches` git forks at the same version. `importCargoLock` vendors both into the same `name-version` directory and fails with a `Permission denied` symlink error. Setting `cargo-hash` switches `cargo-prove` and the runner binary to `fetchCargoVendor`, which keeps git sources separate. When it's set, `cargo-lock-output-hashes` is ignored.
+
+Set it to `lib.fakeHash` (or any wrong hash), build `cargo-prove`, and copy the `got:` hash from the error.
 
 ### cargo-prove-wrapper-env
 
