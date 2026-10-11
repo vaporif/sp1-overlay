@@ -49,6 +49,7 @@
     then
       pkgs.callPackage ../pkgs/sp1-core-runner-binary.nix {
         inherit sp1-src;
+        subdir = versionConfig.runner-binary-subdir or "crates/core/runner/binary";
         cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
       }
     else null;
