@@ -145,7 +145,7 @@ Where the runner binary crate lives. v6.1.0 had it at `crates/core/runner/binary
 
 ### cargo-hash
 
-SP1 v6.9.0's `Cargo.lock` pulls some crates (`sha2`, `k256`, `p256`, `ecdsa`, ...) from both crates.io and the `sp1-patches` git forks at the same version. `importCargoLock` vendors both into the same `name-version` directory and fails with a `Permission denied` symlink error. Setting `cargo-hash` switches `cargo-prove` and the runner binary to `fetchCargoVendor`, which keeps git sources separate. When it's set, `cargo-lock-output-hashes` is ignored.
+SP1 v6.9.0's `Cargo.lock` pulls some crates (`sha2`, `k256`, `p256`, `ecdsa`, ...) from both crates.io and the `sp1-patches` git forks at the same version. `importCargoLock` vendors both into the same `name-version` directory and fails with a `Permission denied` symlink error. Setting `cargo-hash` switches `cargo-prove` and the runner binary to `fetchCargoVendor`, which keeps each source in its own vendor directory. Older `fetchCargoVendor` versions used a flat layout and fail the same way, so this needs a nixpkgs that includes NixOS/nixpkgs@72fdf499ff ("fetchCargoVendor: allow duplicated dependencies"); the March 2026 nixos-unstable this flake used to pin was too old. When it's set, `cargo-lock-output-hashes` is ignored.
 
 Set it to `lib.fakeHash` (or any wrong hash), build `cargo-prove`, and copy the `got:` hash from the error.
 

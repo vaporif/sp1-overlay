@@ -30,7 +30,7 @@
       aarch64-darwin = "sha256-qOnpaVr4fY0Sd+f+u4yiOABNY0/0iRWLMv4E5x/qY7M=";
     };
     cargo-lock-output-hashes = {};
-    cargo-hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    cargo-hash = "sha256-kHtS628Y7/U6MeIGQvOpoJEZgeGBTZfSFNw5lA/44PU=";
     build-flags = [
       "-C"
       "passes=lower-atomic"
