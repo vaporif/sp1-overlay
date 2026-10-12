@@ -122,6 +122,8 @@ nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags
 
 Or set `sha256 = "";` and let Nix report the correct hash on first build attempt.
 
+The `succinct-rust` hash covers only the `library/` directory of the tarball, not the whole repo (newer revs contain case-colliding rustfmt test paths, which unpack differently on macOS). `nix-prefetch-url --unpack` gives the wrong value for it — use the empty-hash method instead.
+
 ### extra-build-env
 
 Version-specific environment variables needed during compilation:

@@ -12,7 +12,7 @@
       owner = "succinctlabs";
       repo = "rust";
       rev = "b34c6ec6349eea303ee60601229383487d84d775";
-      sha256 = "sha256-vOYYclquk9qdKu4s+J4UnFwC6QF8yu6BsnvlpV0kj/k=";
+      sha256 = "sha256-IUsWPVpe6vH2IX41IkSPLENXpJ69JiFqUiLBBVKxqE8=";
     };
     backtrace-rs = {
       owner = "rust-lang";
@@ -60,7 +60,7 @@
       owner = "succinctlabs";
       repo = "rust";
       rev = "e4545c06c345d76aefe89d59ebd86b926f9f1279";
-      sha256 = "sha256-DQZmuZlDMetowQjUo0AC6f0IltgBbWLia0r9JyN5kiI=";
+      sha256 = "sha256-03rVEs0EDkLhIEhuxmdmT7iWA5iCHQRYgYCJ9Oil2Yg=";
     };
     backtrace-rs = {
       owner = "rust-lang";
@@ -106,7 +106,7 @@
       owner = "succinctlabs";
       repo = "rust";
       rev = "0ea3299154194b51eae050236621798ab9a4fa66";
-      sha256 = "sha256-v/mY2SlD3L5A3XUYOrGQi/APqpfVczl3wY5h0evpeqw=";
+      sha256 = "sha256-ch47SV6ClItrwRjLKuT1gp4sBIS2qXOxVGbf5JiUlp8=";
     };
     backtrace-rs = {
       owner = "rust-lang";
