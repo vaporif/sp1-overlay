@@ -144,7 +144,7 @@ for VERSION in $VERSION_LIST; do
     # Handle format! macro: &format!("link-arg=--image-base={}", sp1_primitives::consts::STACK_TOP)
     if echo "$line" | grep -q 'format!'; then
       CONSTS_SRC="$(gh_raw succinctlabs sp1 "$VERSION" crates/primitives/src/consts.rs)"
-      STACK_TOP="$(echo "$CONSTS_SRC" | grep -oP 'STACK_TOP.*?=\s*\K0x[0-9a-fA-F]+' || true)"
+      STACK_TOP="$(echo "$CONSTS_SRC" | grep -oP 'STACK_TOP.*?=\s*\K0x[0-9a-fA-F_]+' | tr -d _ || true)"
       # Extract the format string pattern and substitute
       FMT_STR="$(echo "$line" | grep -oP 'format!\("\K[^"]+' || true)"
       if [[ -n "$FMT_STR" && -n "$STACK_TOP" ]]; then

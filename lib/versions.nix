@@ -1,5 +1,53 @@
 {
-  default-version = "v6.1.0";
+  default-version = "v6.9.0";
+
+  "v6.9.0" = {
+    sp1-src = {
+      owner = "succinctlabs";
+      repo = "sp1";
+      rev = "v6.9.0";
+      sha256 = "sha256-yklArJ8UUtS5ANj1YrM3D+yPMUMe6Y6cTxgLes2hWRg=";
+    };
+    succinct-rust = {
+      owner = "succinctlabs";
+      repo = "rust";
+      rev = "b34c6ec6349eea303ee60601229383487d84d775";
+      sha256 = "sha256-IUsWPVpe6vH2IX41IkSPLENXpJ69JiFqUiLBBVKxqE8=";
+    };
+    backtrace-rs = {
+      owner = "rust-lang";
+      repo = "backtrace-rs";
+      rev = "28ec93b503bf0410745bc3d571bf3dc1caac3019";
+      sha256 = "sha256-fvcqIAtfbf8h98bEQL3beqzYzqEPRFVymRHbH2JpeO0=";
+    };
+    toolchain-version = "1.96.0-64bit-v3";
+    target = "riscv64im-succinct-zkvm-elf";
+    edition = "2024";
+    toolchain-hashes = {
+      x86_64-linux = "sha256-I5BWR8i6AHvtcukgfOraBtCAI/TcpzyHoSKsvnRozgc=";
+      aarch64-linux = "sha256-D+uEZ6LzRShz+V0D0C+OHkthWuPgZI1Zr5MHrY9iWts=";
+      x86_64-darwin = "sha256-ujWSL2FCBgNbtIfxF59yDuoR67A1wc96mRPtMLGPdNw=";
+      aarch64-darwin = "sha256-qOnpaVr4fY0Sd+f+u4yiOABNY0/0iRWLMv4E5x/qY7M=";
+    };
+    cargo-lock-output-hashes = {};
+    cargo-hash = "sha256-kHtS628Y7/U6MeIGQvOpoJEZgeGBTZfSFNw5lA/44PU=";
+    build-flags = [
+      "-C"
+      "passes=lower-atomic"
+      "-C"
+      "link-arg=--image-base=0x78000000"
+      "-C"
+      "panic=abort"
+      "--cfg"
+      "getrandom_backend=\"custom\""
+      "-C"
+      "llvm-args=-misched-prera-direction=bottomup"
+      "-C"
+      "llvm-args=-misched-postra-direction=bottomup"
+    ];
+    extra-build-env = {};
+    runner-binary-subdir = "crates/core/runner-binary";
+  };
 
   "v6.1.0" = {
     sp1-src = {
@@ -12,7 +60,7 @@
       owner = "succinctlabs";
       repo = "rust";
       rev = "e4545c06c345d76aefe89d59ebd86b926f9f1279";
-      sha256 = "sha256-DQZmuZlDMetowQjUo0AC6f0IltgBbWLia0r9JyN5kiI=";
+      sha256 = "sha256-03rVEs0EDkLhIEhuxmdmT7iWA5iCHQRYgYCJ9Oil2Yg=";
     };
     backtrace-rs = {
       owner = "rust-lang";
@@ -58,7 +106,7 @@
       owner = "succinctlabs";
       repo = "rust";
       rev = "0ea3299154194b51eae050236621798ab9a4fa66";
-      sha256 = "sha256-v/mY2SlD3L5A3XUYOrGQi/APqpfVczl3wY5h0evpeqw=";
+      sha256 = "sha256-ch47SV6ClItrwRjLKuT1gp4sBIS2qXOxVGbf5JiUlp8=";
     };
     backtrace-rs = {
       owner = "rust-lang";
@@ -98,7 +146,7 @@
     skip-prebuilt-runner = true;
     # Cargo 1.94+ enables trim-paths by default in release, passing --remap-path-scope
     # to rustc. The v5.2.4 Succinct rustc (based on 1.91) doesn't support that flag.
-    # v6.1.0+ uses a newer Succinct rustc where this isn't an issue.
+    # v6+ uses a newer Succinct rustc where this isn't an issue.
     cargo-prove-wrapper-env = {
       CARGO_PROFILE_RELEASE_TRIM_PATHS = "false";
     };

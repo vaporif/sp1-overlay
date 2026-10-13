@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/vaporif/sp1-overlay/actions/workflows/ci.yml/badge.svg)](https://github.com/vaporif/sp1-overlay/actions/workflows/ci.yml)
 
-*Pure and reproducible* Nix packaging of [SP1](https://github.com/succinctlabs/sp1) (Succinct Labs' zero-knowledge proof system). Provides an overlay, flake packages, and a builder function for compiling SP1 guest programs — no rustup required.
+Nix packaging for [SP1](https://github.com/succinctlabs/sp1), the zero-knowledge proof system from Succinct Labs. You get an overlay, flake packages, and a builder function for compiling SP1 guest programs. Builds are pure and reproducible, and you don't need rustup.
 
 Supported platforms: `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, `aarch64-darwin`.
 
@@ -10,29 +10,31 @@ Supported platforms: `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, `aarch64-
 
 | Package | Description |
 |---------|-------------|
-| `cargo-prove` | SP1 CLI tool, built from source with a rustc wrapper that handles `RUSTUP_TOOLCHAIN=succinct` dispatch |
-| `sp1-rust-toolchain` | Pre-built Rust toolchain with the SP1 RISC-V target |
-| `sp1-sysroot` | Combined sysroot with SP1 target libs and host std |
-| `sp1-host-std` | Host-side std rebuilt with SP1's custom Rust compiler |
-| `buildSp1Program` | Builder function to compile SP1 guest programs as pure Nix derivations |
+| `cargo-prove` | The SP1 CLI, built from source. It ships with a rustc wrapper that handles `RUSTUP_TOOLCHAIN=succinct` dispatch. |
+| `sp1-rust-toolchain` | Prebuilt Rust toolchain with the SP1 RISC-V target |
+| `sp1-sysroot` | One sysroot with the SP1 target libs and the host std |
+| `sp1-host-std` | Host std rebuilt with SP1's custom Rust compiler |
+| `buildSp1Program` | Builds SP1 guest programs as pure Nix derivations |
 
-## Multi-version support
+## SP1 versions
 
-Multiple SP1 versions are available through the overlay under `pkgs.sp1.<version>`:
+The overlay ships several SP1 versions under `pkgs.sp1.<version>`:
 
 | Version | SP1 | Toolchain | Target |
 |---------|-----|-----------|--------|
-| `v6.1.0` (default) | 6.1.0 | 1.93.0-64bit | `riscv64im-succinct-zkvm-elf` |
+| `v6.9.0` (default) | 6.9.0 | 1.96.0-64bit-v3 | `riscv64im-succinct-zkvm-elf` |
+| `v6.1.0` | 6.1.0 | 1.93.0-64bit | `riscv64im-succinct-zkvm-elf` |
 | `v5.2.4` | 5.2.4 | 1.91.1 | `riscv32im-succinct-zkvm-elf` |
 
 ```nix
 # Via overlay
+pkgs.sp1."v6.9.0".cargo-prove
 pkgs.sp1."v6.1.0".cargo-prove
 pkgs.sp1."v5.2.4".cargo-prove
 
 # Top-level aliases point to the default version
-pkgs.cargo-prove        # = pkgs.sp1."v6.1.0".cargo-prove
-pkgs.buildSp1Program    # = pkgs.sp1."v6.1.0".buildSp1Program
+pkgs.cargo-prove        # = pkgs.sp1."v6.9.0".cargo-prove
+pkgs.buildSp1Program    # = pkgs.sp1."v6.9.0".buildSp1Program
 ```
 
 ## Installation
@@ -46,7 +48,7 @@ cargo prove --version
 
 ### Flake overlay
 
-**You need to bring your own `cargo`** — this flake only provides SP1-specific tooling.
+This flake only provides the SP1 tooling, so you need to add your own `cargo`.
 
 ```nix
 {
@@ -73,9 +75,9 @@ cargo prove --version
 }
 ```
 
-## Building SP1 programs as Nix derivations
+## Building SP1 programs with Nix
 
-`buildSp1Program` compiles SP1 guest programs to RISC-V ELF binaries as pure Nix derivations. No `cargo prove`, no network access at build time.
+`buildSp1Program` compiles an SP1 guest program to a RISC-V ELF binary inside a pure Nix derivation. It doesn't call `cargo prove` and doesn't touch the network during the build.
 
 ```nix
 {
@@ -106,40 +108,40 @@ nix build .#my-program-elf
 file result/my-program  # ELF 64-bit LSB executable, UCB RISC-V
 ```
 
-**Parameters:**
+Parameters:
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `pname` | yes | -- | Cargo package name of the program crate |
-| `src` | yes | -- | Source tree (must contain `Cargo.lock`) |
-| `cargoLock` | yes | -- | `{ lockFile = ./Cargo.lock; }` -- dependencies are vendored automatically |
+| `pname` | yes | | Cargo package name of the program crate |
+| `src` | yes | | Source tree. Must contain `Cargo.lock`. |
+| `cargoLock` | yes | | `{ lockFile = ./Cargo.lock; }`. Dependencies are vendored for you. |
 | `version` | no | `"0.1.0"` | Derivation version |
-| `target` | no | per SP1 version | SP1 compilation target |
+| `target` | no | depends on SP1 version | SP1 compilation target |
 
-See [`test-app/`](test-app/) for a complete working example.
+[`test-app/`](test-app/) has a full working example.
 
-## Custom SP1 versions
+## Other SP1 versions
 
-Use `lib.mkSp1Packages` to build any SP1 version not included in the overlay. Copy an existing entry from [`lib/versions.nix`](lib/versions.nix) as a template.
+To build an SP1 version the overlay doesn't include, use `lib.mkSp1Packages`. Copy an entry from [`lib/versions.nix`](lib/versions.nix) and change the values.
 
-See [`docs/upstream-reference.md`](docs/upstream-reference.md) for where each field comes from in SP1's source code and how to find the correct values for a new version.
+[`docs/upstream-reference.md`](docs/upstream-reference.md) explains where each field comes from in SP1's source and how to find the right values for a new version.
 
 ## How it works
 
-`cargo-prove` normally requires rustup to dispatch between the host Rust toolchain and the SP1 cross-compiler. In Nix there is no rustup, so this flake bundles a rustc wrapper that:
+`cargo-prove` normally relies on rustup to switch between your host Rust toolchain and the SP1 cross-compiler. Nix has no rustup, so this flake bundles a rustc wrapper. The wrapper:
 
-- Intercepts `--print sysroot` to return a combined sysroot containing SP1's RISC-V target libs
-- Routes `riscv{32,64}im-succinct-zkvm-elf` compilations to the SP1 toolchain's rustc
-- Falls through to the next `rustc` on PATH for host/build dependencies (proc-macros, build scripts, etc.)
+- answers `--print sysroot` with a combined sysroot that includes SP1's RISC-V target libs
+- sends `riscv{32,64}im-succinct-zkvm-elf` builds to the SP1 toolchain's rustc
+- passes everything else (proc-macros, build scripts, other host dependencies) to the next `rustc` on PATH
 
-Your Rust toolchain (fenix, oxalica, nixpkgs, etc.) is used for host compilation -- `cargo-prove` only takes over for the SP1 guest target.
+Host code is compiled by whatever Rust toolchain you already use: fenix, oxalica, nixpkgs, or something else. `cargo-prove` only takes over for the SP1 guest target.
 
-`buildSp1Program` replicates what `cargo prove build` does, but as a pure Nix derivation:
+`buildSp1Program` does what `cargo prove build` does, inside a pure Nix derivation:
 
-1. Dependencies are vendored from `Cargo.lock` via `importCargoLock`
-2. The SP1 sysroot's `rustc` is used for cross-compilation to the RISC-V target
-3. `CARGO_ENCODED_RUSTFLAGS` passes the same flags SP1 uses internally
-4. The output is a statically-linked RISC-V ELF ready for `include_elf!` in your host program
+1. `importCargoLock` vendors the dependencies from `Cargo.lock`.
+2. The `rustc` from the SP1 sysroot cross-compiles to the RISC-V target.
+3. `CARGO_ENCODED_RUSTFLAGS` passes the same flags SP1 uses internally.
+4. The result is a statically linked RISC-V ELF that your host program can load with `include_elf!`.
 
 ## License
 

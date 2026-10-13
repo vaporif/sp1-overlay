@@ -6,9 +6,22 @@
     inherit (versionConfig.sp1-src) owner repo rev sha256;
   };
 
-  succinct-rust = pkgs.fetchFromGitHub {
+  # Only library/ is needed. Extracting the whole repo isn't reproducible across
+  # platforms: rustfmt tests contain case-colliding paths that collapse on macOS.
+  succinct-rust = let
     inherit (versionConfig.succinct-rust) owner repo rev sha256;
-  };
+  in
+    pkgs.fetchurl {
+      name = "succinct-rust-library-${rev}";
+      url = "https://github.com/${owner}/${repo}/archive/${rev}.tar.gz";
+      inherit sha256;
+      recursiveHash = true;
+      downloadToTemp = true;
+      postFetch = ''
+        mkdir -p $out
+        tar xzf $downloadedFile -C $out --strip-components=1 --wildcards '*/library/*'
+      '';
+    };
   backtrace-rs =
     if versionConfig.backtrace-rs != null
     then
@@ -49,7 +62,9 @@
     then
       pkgs.callPackage ../pkgs/sp1-core-runner-binary.nix {
         inherit sp1-src;
+        subdir = versionConfig.runner-binary-subdir or "crates/core/runner/binary";
         cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
+        cargoHash = versionConfig.cargo-hash or null;
       }
     else null;
 
@@ -58,6 +73,7 @@
     sp1-rev = versionConfig.sp1-src.rev;
     sp1-timestamp = "";
     cargoLockOutputHashes = versionConfig.cargo-lock-output-hashes;
+    cargoHash = versionConfig.cargo-hash or null;
     wrapperEnv = versionConfig.cargo-prove-wrapper-env or {};
   };
 

@@ -13,6 +13,8 @@ This document maps each field in [`lib/versions.nix`](../lib/versions.nix) to it
 | `backtrace-rs.rev` | Git submodule at `library/backtrace` in `succinctlabs/rust` |
 | `toolchain-hashes` | SHA256 of release artifacts at `succinctlabs/rust/releases` |
 | `skip-prebuilt-runner` | Set `true` for versions without `crates/core/runner/binary/` (pre-v6.1.0) |
+| `runner-binary-subdir` | Path of the `sp1-core-executor-runner-binary` crate: `crates/core/runner/binary` (default, v6.1.0) or `crates/core/runner-binary` (later v6) |
+| `cargo-hash` | Vendor hash for `cargo-prove` and the runner binary; needed when SP1's `Cargo.lock` has the same crate from both crates.io and git (v6.9.0 needs it) |
 | `cargo-prove-wrapper-env` | Runtime env vars for `cargo-prove` (e.g. disable trim-paths for older toolchains) |
 | `sp1-src.sha256` | Nix-computed hash of the source tarball (self-verifying) |
 
@@ -27,7 +29,7 @@ SP1's CLI defines which Rust toolchain to use:
 pub const LATEST_SUPPORTED_TOOLCHAIN_VERSION_TAG: &str = "succinct-1.93.0-64bit";
 ```
 
-Strip the `succinct-` prefix to get the value for `versions.nix`. For v6.1.0 this is `"1.93.0-64bit"`, for v5.2.4 it's `"1.91.1"`.
+Strip the `succinct-` prefix to get the value for `versions.nix`. For v6.9.0 this is `"1.96.0-64bit-v3"`, for v5.2.4 it's `"1.91.1"`.
 
 ### target
 
@@ -106,8 +108,8 @@ Where `{triple}` is one of:
 To get the Nix hash for a new release:
 
 ```bash
-nix hash to-sri --type sha256 $(nix-prefetch-url --unpack \
-  "https://github.com/succinctlabs/rust/releases/download/succinct-1.93.0-64bit/rust-toolchain-aarch64-apple-darwin.tar.gz")
+nix hash to-sri --type sha256 $(nix-prefetch-url \
+  "https://github.com/succinctlabs/rust/releases/download/succinct-1.96.0-64bit-v3/rust-toolchain-aarch64-apple-darwin.tar.gz")
 ```
 
 ### sp1-src and succinct-rust SHA256 hashes
@@ -115,10 +117,12 @@ nix hash to-sri --type sha256 $(nix-prefetch-url --unpack \
 These are Nix content hashes of the fetched source. They are **self-verifying** — if wrong, the build fails. To compute them for a new version:
 
 ```bash
-nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags/v6.1.0.tar.gz"
+nix-prefetch-url --unpack "https://github.com/succinctlabs/sp1/archive/refs/tags/v6.9.0.tar.gz"
 ```
 
 Or set `sha256 = "";` and let Nix report the correct hash on first build attempt.
+
+The `succinct-rust` hash covers only the `library/` directory of the tarball, not the whole repo (newer revs contain case-colliding rustfmt test paths, which unpack differently on macOS). `nix-prefetch-url --unpack` gives the wrong value for it — use the empty-hash method instead.
 
 ### extra-build-env
 
@@ -135,7 +139,17 @@ The Rust edition used for building the host standard library. Check the `edition
 
 SP1 v6.1.0 added a `build.rs` in `crates/core/runner` that shells out to `cargo build` for an internal helper binary. That nested build doesn't work in the Nix sandbox — the output lands in a different path than the script expects. To work around this, the overlay builds the runner binary in its own derivation and passes it back via `SP1_CORE_RUNNER_OVERRIDE_BINARY`, an escape hatch the upstream build.rs already supports.
 
-This is on by default. Set `skip-prebuilt-runner = true` for older versions that don't have `crates/core/runner/binary/Cargo.toml`.
+This is on by default. Set `skip-prebuilt-runner = true` for older versions that have no runner binary crate.
+
+### runner-binary-subdir
+
+Where the runner binary crate lives. v6.1.0 had it at `crates/core/runner/binary` (the default); later v6 releases moved it to `crates/core/runner-binary`.
+
+### cargo-hash
+
+SP1 v6.9.0's `Cargo.lock` pulls some crates (`sha2`, `k256`, `p256`, `ecdsa`, ...) from both crates.io and the `sp1-patches` git forks at the same version. `importCargoLock` vendors both into the same `name-version` directory and fails with a `Permission denied` symlink error. Setting `cargo-hash` switches `cargo-prove` and the runner binary to `fetchCargoVendor`, which keeps each source in its own vendor directory. Older `fetchCargoVendor` versions used a flat layout and fail the same way, so this needs a nixpkgs that includes NixOS/nixpkgs@72fdf499ff ("fetchCargoVendor: allow duplicated dependencies"); the March 2026 nixos-unstable this flake used to pin was too old. When it's set, `cargo-lock-output-hashes` is ignored.
+
+Set it to `lib.fakeHash` (or any wrong hash), build `cargo-prove`, and copy the `got:` hash from the error.
 
 ### cargo-prove-wrapper-env
 
@@ -154,6 +168,6 @@ Defaults to `{}` when omitted.
 5. Extract build flags from `crates/build/src/command/utils.rs`
 6. Extract the target from `crates/build/src/lib.rs`
 7. Compute toolchain hashes for all 4 platforms
-8. Check if `crates/core/runner/binary/Cargo.toml` exists — if not, set `skip-prebuilt-runner = true`
+8. Locate the `sp1-core-executor-runner-binary` crate and set `runner-binary-subdir` (or `skip-prebuilt-runner = true` if it doesn't exist)
 9. Add the entry to `lib/versions.nix` using an existing version as template
 10. Run CI to verify everything builds and proofs verify
