@@ -13,7 +13,7 @@
   wrapperEnv ? {},
 }: let
   # importCargoLock can't vendor a crate that appears as both a registry and a git
-  # source with the same name-version (SP1 v6.9.0 patches); fetchCargoVendor can.
+  # source with the same name-version (SP1 v6.9.0+ patches); fetchCargoVendor can.
   vendorArgs =
     if cargoHash != null
     then {inherit cargoHash;}

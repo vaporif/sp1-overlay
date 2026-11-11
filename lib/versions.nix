@@ -1,12 +1,12 @@
 {
-  default-version = "v6.9.0";
+  default-version = "v6.10.0";
 
-  "v6.9.0" = {
+  "v6.10.0" = {
     sp1-src = {
       owner = "succinctlabs";
       repo = "sp1";
-      rev = "v6.9.0";
-      sha256 = "sha256-yklArJ8UUtS5ANj1YrM3D+yPMUMe6Y6cTxgLes2hWRg=";
+      rev = "v6.10.0";
+      sha256 = "sha256-F1aFba4CZWDwW+i8lS0yyqYVXj+cmAKB8PX/bXv0Fx4=";
     };
     succinct-rust = {
       owner = "succinctlabs";
@@ -30,7 +30,7 @@
       aarch64-darwin = "sha256-qOnpaVr4fY0Sd+f+u4yiOABNY0/0iRWLMv4E5x/qY7M=";
     };
     cargo-lock-output-hashes = {};
-    cargo-hash = "sha256-kHtS628Y7/U6MeIGQvOpoJEZgeGBTZfSFNw5lA/44PU=";
+    cargo-hash = "sha256-WhTR8O5lzEgF1JaOcTYmWO/wsJ7fK39xQTfZJu8ECpg=";
     build-flags = [
       "-C"
       "passes=lower-atomic"
