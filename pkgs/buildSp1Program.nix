@@ -27,6 +27,11 @@ in
 
       dontStrip = true;
 
+      # nixpkgs' cargo setup hook (cargoUseSystemLibs) forces -sys crates to use
+      # system libraries, which don't exist for the zkVM target; keep the
+      # crates' default (bundled) behaviour.
+      dontCargoUseSystemLibs = true;
+
       buildPhase = ''
         runHook preBuild
 
